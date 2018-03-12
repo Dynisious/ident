@@ -3,10 +3,10 @@
 //! Author --- daniel.bechaz@gmail.com  
 //! Last Moddified --- 2018/02/12
 //!
-//! The main type provided by this crate is [`WithIdent`](./with_ident/struct.WithIdent.html).
+//! The main type provided by this crate is [`WithIdent`](./struct.WithIdent.html).
 
-pub mod with_ident;
-pub mod ident_collections;
+mod with_ident;
+mod ident_collections;
 
 pub use with_ident::*;
 pub use ident_collections::*;
