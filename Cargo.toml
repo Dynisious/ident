@@ -5,6 +5,7 @@ authors = ["Dynisious <daniel.bechaz@gmail.com>"]
 description = "A utility crate for wrapping types with an immutable identifier and storing/accessing such types in collections."
 repository = "https://github.com/Dynisious/ident"
 keywords = ["utility", "identifier", "key"]
+license = "0BSD"
 is-it-maintained-issue-resolution = { repository = "https://github.com/Dynisious/ident" }
 is-it-maintained-open-issues = { repository = "https://github.com/Dynisious/ident" }
 maintenance = { status = "passively-maintained" }
