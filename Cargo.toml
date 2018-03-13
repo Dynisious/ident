@@ -1,6 +1,6 @@
 [package]
 name = "ident"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Dynisious <daniel.bechaz@gmail.com>"]
 description = "A utility crate for wrapping types with an immutable identifier and storing/accessing such types in collections."
 repository = "https://github.com/Dynisious/ident"

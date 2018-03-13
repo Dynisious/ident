@@ -1,5 +1,6 @@
+//! Author --- daniel.bechaz@gmail.com  
+//! Last Moddified --- 2018/03/13
 
-use std::convert::From;
 use super::*;
 
 /// Derives an `identifier` from a value.
