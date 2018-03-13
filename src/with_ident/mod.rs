@@ -3,14 +3,12 @@
 //! Author --- daniel.bechaz@gmail.com  
 //! Last Moddified --- 2018/03/13
 
-use std::ops::Deref;
-use std::borrow::Borrow;
-use std::convert::{From, Into};
+use std::ops::{Deref, DerefMut};
+use std::borrow::{Borrow, BorrowMut};
+use std::convert::{AsRef, AsMut, From, Into};
 
-mod mut_with_ident;
 mod derive_ident;
 
-pub use self::mut_with_ident::*;
 pub use self::derive_ident::*;
 
 /// `WithIdent` wraps any value of type `T` and a unique identifier of type `I`.
@@ -20,9 +18,6 @@ pub use self::derive_ident::*;
 ///
 /// It can be useful to think of `WithIdent` as a tuple of `(I, T)`, so `From` and `Into`
 /// have been implemented for just that conversion.
-///
-/// NOTE: Only immutable access to the inner value is provided by `WithIdent`. For mutable
-/// access see [`WithIdentMut`](./struct.WithIdentMut.html).
 #[derive(Clone, Copy)]
 pub struct WithIdent<T, I: Eq = usize> {
     /// The unique `identifier` of a `WithIdent` instance.
@@ -36,8 +31,8 @@ impl<T, I: Eq> WithIdent<T, I> {
     ///
     /// # Params
     ///
-    /// identifier --- The unique `identifier` of a `WithIdent` instance.  
-    /// value --- The inner `value` of a `WithIdent` instance.
+    /// identifier --- The unique `identifier` for `value`.  
+    /// value --- The inner `value` of the `WithIdent` instance.
     pub fn new(identifier: I, value: T) -> Self {
         Self { identifier, value }
     }
@@ -134,6 +129,52 @@ impl<T, I: Eq + Clone> WithIdent<T, I> {
     pub fn as_ref(wi: &Self) -> WithIdent<&T, I> {
         WithIdent::new(wi.identifier.clone(), &wi.value)
     }
+    /// Returns a new `WithIdent` instance wrapping a mutable reference to the original value.
+    ///
+    /// Note: this is an associated function, which means that you have to call it as
+    /// `WithIdent::as_mut(&mut wi)` instead of `wi.as_mut()`. This is so that there is
+    /// no conflict with a method on the inner type.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # extern crate ident;
+    /// # use ident::*;
+    /// # fn main() {
+    /// let mut wi = WithIdent::new(0, 5);
+    /// assert_eq!(5, **WithIdent::as_mut(&mut wi));
+    /// # }
+    /// ```
+    pub fn as_mut(wi: &mut Self) -> WithIdent<&mut T, I> {
+        WithIdent::new(wi.identifier.clone(), &mut wi.value)
+    }
+}
+
+impl<T: DeriveIdent<I>, I: Eq> WithIdent<T, I> {
+    /// Consumes the `WithIdent` and returns a new instance with an updated `identifier`
+    /// derived from the inner value.
+    ///
+    /// Note: this is an associated function, which means that you have to call it as
+    /// `WithIdent::update_ident(wi)` instead of `wi.update_ident()`. This is so that
+    /// there is no conflict with a method on the inner type.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # extern crate ident;
+    /// # use ident::*;
+    /// # fn main() {
+    /// let mut wi = WithIdent::from(5);
+    /// assert_eq!(5, *wi.get_identifier());
+    ///
+    /// *wi = 10;
+    /// wi = WithIdent::update_ident(wi);
+    /// assert_eq!(10, *wi.get_identifier());
+    /// # }
+    /// ```
+    pub fn update_ident(mut wi: Self) -> Self {
+        wi.identifier = DeriveIdent::derive_ident(&wi.value); wi
+    }
 }
 
 impl<T, I: Eq> From<(I, T)> for WithIdent<T, I> {
@@ -156,8 +197,32 @@ impl<T, I: Eq> Deref for WithIdent<T, I> {
     }
 }
 
+impl<T, I: Eq> DerefMut for WithIdent<T, I> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value
+    }
+}
+
 impl<T, I: Eq> Borrow<T> for WithIdent<T, I> {
     fn borrow(&self) -> &T {
         &self.value
+    }
+}
+
+impl<T, I: Eq> BorrowMut<T> for WithIdent<T, I> {
+    fn borrow_mut(&mut self) -> &mut T {
+        &mut self.value
+    }
+}
+
+impl<T, I: Eq> AsRef<T> for WithIdent<T, I> {
+    fn as_ref(&self) -> &T {
+        &self.value
+    }
+}
+
+impl<T, I: Eq> AsMut<T> for WithIdent<T, I> {
+    fn as_mut(&mut self) -> &mut T {
+        &mut self.value
     }
 }

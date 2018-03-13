@@ -38,12 +38,6 @@ impl<T: DeriveIdent<I>, I: Eq> From<T> for WithIdent<T, I> {
     }
 }
 
-impl<T: DeriveIdent<I>, I: Eq> From<T> for WithIdentMut<T, I> {
-    fn from(from: T) -> Self {
-        Self::new(DeriveIdent::derive_ident(&from), from)
-    }
-}
-
 /// In some cases, such as `integer` types, a value is its own unique `identifier`.
 ///
 /// This macro implements [`DeriveIdent`](./trait.DeriveIdent.html) for the passed type to
