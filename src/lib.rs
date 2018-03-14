@@ -182,6 +182,7 @@ impl<T: DeriveIdent<I>, I: Eq> WithIdent<T, I> {
 }
 
 impl<T: Eq, I: Eq> WithIdent<T, I> {
+    /// Compares the `values` of two `WithIdent` instances for equality.
     pub fn same_value<U: Eq>(a: &WithIdent<T, I>, b: &WithIdent<T, U>) -> bool {
         a.value == b.value
     }
