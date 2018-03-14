@@ -45,8 +45,8 @@ impl<T, I: Eq> WithIdent<T, I> {
         &self.identifier
     }
     /// Compares the `identifiers` of two `WithIdent` instances for equality.
-    pub fn same_ident(a: &Self, b: &Self) -> bool {
-        a.identifier == b.identifier
+    pub fn same_ident<U>(a: &WithIdent<T, I>, b: &WithIdent<U, I>) -> bool {
+        a.get_identifier() == b.get_identifier()
     }
     /// Consumes the `WithIdent` returning the wrapped `T` value.
     ///
@@ -182,7 +182,7 @@ impl<T: DeriveIdent<I>, I: Eq> WithIdent<T, I> {
 }
 
 impl<T: Eq, I: Eq> WithIdent<T, I> {
-    pub fn same_value(a: &Self, b: &Self) -> bool {
+    pub fn same_value<U: Eq>(a: &WithIdent<T, I>, b: &WithIdent<T, U>) -> bool {
         a.value == b.value
     }
 }

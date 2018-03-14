@@ -55,7 +55,7 @@ pub trait IdentCollection<T, I = usize, E = WithIdent<T, I>>
 impl<T, I, E> IdentCollection<T, I, E> for Vec<E>
     where E: BorrowMut<WithIdent<T, I>>, I: Eq {
     fn insert_by_id(&mut self, mut value: E) -> Option<E> {
-        if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(value.borrow(), E::borrow(e))) {
+        if let Some(e) = self.iter_mut().find(|e| WithIdent::<T, I>::same_ident(value.borrow(), E::borrow(e))) {
             swap::<T>(E::borrow_mut(e), value.borrow_mut());
             return Some(value)
         }
