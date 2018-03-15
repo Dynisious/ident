@@ -18,7 +18,7 @@ use ident::*;
 Lets say you have some type:
 ```rust
 #[derive(Clone)]
-stuct Foo {
+struct Foo {
     x: usize
 }
 
@@ -40,7 +40,7 @@ fn main() {
    my_foos.insert(5, Foo::new(10));
    my_foos.insert(10, Foo::new(5));
    
-   let mut foo = my_foos.get(&5).clone();
+   let mut foo = my_foos.get(&5).unwrap().clone();
    foo.do_stuff();
 }
 ```
@@ -54,13 +54,13 @@ fn main() {
    my_foos.insert(5, Foo::new(10));
    my_foos.insert(10, Foo::new(5));
    
-   let mut foo = WithIdent::map(my_foos.get_with_ident(5), Clone::clone);
+   let mut foo = WithIdent::map(my_foos.get_with_ident(5).unwrap(), Clone::clone);
    foo.do_stuff();
 }
 ```
-We are able to get the `key` bundled the `value` while still accessing the value as if it wasn't there.
+We are able to get the `key` bundled with the `value` while still accessing the value as if it wasn't there.
 
 This is a simple use case however:
-* Getting and Inserting with with an "identifier" is implemented on standard collections.
+* Getting and Inserting with an "identifier" is implemented on standard collections.
 * Rusts is able to infer the type of your value without your intervention.
 * There are several utility functions for `WithIdent` which allow you to manipulate the inner value or the identifier as needed.

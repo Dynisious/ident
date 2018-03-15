@@ -1,5 +1,6 @@
 
 /target
 **/*.rs.bk
+src/bin/*.rs
 Cargo.lock
 *.sesh
