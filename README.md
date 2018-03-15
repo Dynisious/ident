@@ -18,7 +18,7 @@ use ident::*;
 Lets say you have some type:
 ```rust
 #[derive(Clone)]
-stuct Foo {
+struct Foo {
     x: usize
 }
 
