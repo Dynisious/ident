@@ -5,13 +5,11 @@
 
 use std::mem::swap;
 use std::collections::*;
-use std::borrow::BorrowMut;
 use super::*;
 
 /// The `IdentCollection` trait provides functionality for collections working with
 /// `WithIdent` values.
-pub trait IdentCollection<T, I = usize, E = WithIdent<T, I>>
-    where E: BorrowMut<WithIdent<T, I>>, I: Eq {
+pub trait IdentCollection<T, I: Eq = usize> {
     /// Inserts the passed value or updates the first value found with an equal `identifier`.
     ///
     /// If a value is updated the old value is returned in a `Some(value)`.
@@ -26,89 +24,134 @@ pub trait IdentCollection<T, I = usize, E = WithIdent<T, I>>
     /// let a = WithIdent::new(1, 5);
     /// let b = WithIdent::new(1, 10);
     ///
-    /// assert!(vec.insert_by_id(a.clone()).is_none()); //Inserting.
-    /// assert_eq!(*a, *vec.insert_by_id(b.clone()).unwrap()); //Updating.
-    /// assert_eq!(*b, *vec[0]); //Updated value.
+    /// assert!(vec.insert_by_ident(a.clone()).is_none()); //Inserting.
+    /// assert_eq!(a, vec.insert_by_ident(b.clone()).unwrap()); //Updating.
+    /// assert_eq!(b, vec[0]); //Updated value.
     /// # }
     /// ```
-    fn insert_by_id(&mut self, value: E) -> Option<E>;
+    fn insert_by_ident(&mut self, value: WithIdent<T, I>) -> Option<WithIdent<T, I>>;
     /// Searches for the passed `identifier` in the collection.
     ///
     /// # Params
     ///
     /// identifier --- The `identifier` to seach for.
-    fn contains_id(&self, identifier: &I) -> bool;
+    fn contains_ident(&self, identifier: &I) -> bool;
     /// Attempts to retrieve a reference to the value with the passed `identifier`.
     ///
+    /// If a reference is found it is returned with the identifier attached.
+    ///
     /// # Params
     ///
     /// identifier --- The `identifier` to seach for.
-    fn get_with_id(&self, identifier: &I) -> Option<&E>;
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>>;
     /// Attempts to retrieve a mutable reference to the value with the passed `identifier`.
     ///
+    /// If a reference is found it is returned with the identifier attached.
+    ///
     /// # Params
     ///
     /// identifier --- The `identifier` to seach for.
-    fn get_mut_with_id(&mut self, identifier: &I) -> Option<&mut E>;
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>>;
 }
 
-impl<T, I, E> IdentCollection<T, I, E> for Vec<E>
-    where E: BorrowMut<WithIdent<T, I>>, I: Eq {
-    fn insert_by_id(&mut self, mut value: E) -> Option<E> {
-        if let Some(e) = self.iter_mut().find(|e| WithIdent::<T, I>::same_ident(value.borrow(), E::borrow(e))) {
-            swap::<T>(E::borrow_mut(e), value.borrow_mut());
-            return Some(value)
+impl<T, I: Eq> IdentCollection<T, I> for Vec<WithIdent<T, I>> {
+    fn insert_by_ident(&mut self, mut value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+        if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(&value, e)) {
+            swap::<T>(e, &mut value);
+            return Some(value);
         }
         self.push(value); None
     }
-    fn contains_id(&self, identifier: &I) -> bool {
-        self.iter().any(|e| E::borrow(e).get_identifier() == identifier)
+    fn contains_ident(&self, identifier: &I) -> bool {
+        self.iter().any(|e| e.get_identifier() == identifier)
     }
-    fn get_with_id(&self, identifier: &I) -> Option<&E> {
-        self.iter().find(|e| E::borrow(e).get_identifier() == identifier)
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+        self.iter().find(|e| e.get_identifier() == &identifier)
+        .map(|e| WithIdent::new(identifier, e.as_ref()))
     }
-    fn get_mut_with_id(&mut self, identifier: &I) -> Option<&mut E> {
-        self.iter_mut().find(|e| E::borrow(e).get_identifier() == identifier)
-    }
-}
-
-impl<T, I, E> IdentCollection<T, I, E> for VecDeque<E>
-    where E: BorrowMut<WithIdent<T, I>>, I: Eq {
-    fn insert_by_id(&mut self, mut value: E) -> Option<E> {
-        if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(value.borrow(), E::borrow(e))) {
-            swap::<T>(E::borrow_mut(e), value.borrow_mut());
-            return Some(value)
-        }
-        self.push_back(value); None
-    }
-    fn contains_id(&self, identifier: &I) -> bool {
-        self.iter().any(|e| E::borrow(e).get_identifier() == identifier)
-    }
-    fn get_with_id(&self, identifier: &I) -> Option<&E> {
-        self.iter().find(|e| E::borrow(e).get_identifier() == identifier)
-    }
-    fn get_mut_with_id(&mut self, identifier: &I) -> Option<&mut E> {
-        self.iter_mut().find(|e| E::borrow(e).get_identifier() == identifier)
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+        self.iter_mut().find(|e| e.get_identifier() == &identifier)
+        .map(|e| WithIdent::new(identifier, e.as_mut()))
     }
 }
 
-impl<T, I, E> IdentCollection<T, I, E> for LinkedList<E>
-    where E: BorrowMut<WithIdent<T, I>>, I: Eq {
-    fn insert_by_id(&mut self, mut value: E) -> Option<E> {
-        if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(value.borrow(), E::borrow(e))) {
-            swap::<T>(E::borrow_mut(e), value.borrow_mut());
-            return Some(value)
+impl<T, I: Eq> IdentCollection<T, I> for VecDeque<WithIdent<T, I>> {
+    fn insert_by_ident(&mut self, mut value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+        if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(&value, e)) {
+            swap::<T>(e, &mut value);
+            return Some(value);
         }
         self.push_back(value); None
     }
-    fn contains_id(&self, identifier: &I) -> bool {
-        self.iter().any(|e| E::borrow(e).get_identifier() == identifier)
+    fn contains_ident(&self, identifier: &I) -> bool {
+        self.iter().any(|e| e.get_identifier() == identifier)
     }
-    fn get_with_id(&self, identifier: &I) -> Option<&E> {
-        self.iter().find(|e| E::borrow(e).get_identifier() == identifier)
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+        self.iter().find(|e| e.get_identifier() == &identifier)
+        .map(|e| WithIdent::new(identifier, e.as_ref()))
     }
-    fn get_mut_with_id(&mut self, identifier: &I) -> Option<&mut E> {
-        self.iter_mut().find(|e| E::borrow(e).get_identifier() == identifier)
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+        self.iter_mut().find(|e| e.get_identifier() == &identifier)
+        .map(|e| WithIdent::new(identifier, e.as_mut()))
+    }
+}
+
+impl<T, I: Eq> IdentCollection<T, I> for LinkedList<WithIdent<T, I>> {
+    fn insert_by_ident(&mut self, mut value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+        if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(&value, e)) {
+            swap::<T>(e, &mut value);
+            return Some(value);
+        }
+        self.push_back(value); None
+    }
+    fn contains_ident(&self, identifier: &I) -> bool {
+        self.iter().any(|e| e.get_identifier() == identifier)
+    }
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+        self.iter().find(|e| e.get_identifier() == &identifier)
+        .map(|e| WithIdent::new(identifier, e.as_ref()))
+    }
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+        self.iter_mut().find(|e| e.get_identifier() == &identifier)
+        .map(|e| WithIdent::new(identifier, e.as_mut()))
+    }
+}
+
+impl<T, I, S> IdentCollection<T, I> for HashMap<I, T, S> where I: Eq + ::std::hash::Hash + Clone, S: std::hash::BuildHasher {
+    fn insert_by_ident(&mut self, value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+        let (ident, value) = value.into();
+        self.insert(ident.clone(), value)
+        .map(|e| WithIdent::new(ident, e))
+    }
+    fn contains_ident(&self, identifier: &I) -> bool {
+        self.contains_key(identifier)
+    }
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+        self.get(&identifier)
+        .map(|e| WithIdent::new(identifier, e))
+    }
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+        self.get_mut(&identifier)
+        .map(|e| WithIdent::new(identifier, e))
+    }
+}
+
+impl<T, I> IdentCollection<T, I> for BTreeMap<I, T> where I: Eq + Ord + Clone {
+    fn insert_by_ident(&mut self, value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+        let (ident, value) = value.into();
+        self.insert(ident.clone(), value)
+        .map(|e| WithIdent::new(ident, e))
+    }
+    fn contains_ident(&self, identifier: &I) -> bool {
+        self.contains_key(identifier)
+    }
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+        self.get(&identifier)
+        .map(|e| WithIdent::new(identifier, e))
+    }
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+        self.get_mut(&identifier)
+        .map(|e| WithIdent::new(identifier, e))
     }
 }
 
@@ -120,28 +163,28 @@ mod tests {
             
             let mut collection = $($init)*;
             let a = WithIdent::<usize>::new(1, 5);
-            let b = WithIdent::<usize>::new(1, 10);
+            let mut b = WithIdent::<usize>::new(1, 10);
             
-            assert!(collection.insert_by_id(a).is_none(),
-                concat!("`", stringify!($type), "::insert_by_id` returned a value while inserting.")
+            assert!(collection.insert_by_ident(a).is_none(),
+                concat!("`", stringify!($type), "::insert_by_ident` returned a value while inserting.")
             );
-            assert_eq!(*a, *collection.insert_by_id(b)
-                .expect(concat!("`", stringify!($type), "::insert_by_id` failed while updating a value.")),
-                concat!("`", stringify!($type), "::insert_by_id` returned an incorrect value from update.")
+            assert_eq!(a, collection.insert_by_ident(b)
+                .expect(concat!("`", stringify!($type), "::insert_by_ident` failed while updating a value.")),
+                concat!("`", stringify!($type), "::insert_by_ident` returned an incorrect value from update.")
             );
-            assert!(collection.contains_id(&1),
-                concat!("`", stringify!($type), "::contains_id` failed to find identifier.")
+            assert!(collection.contains_ident(&1),
+                concat!("`", stringify!($type), "::contains_ident` failed to find identifier.")
             );
-            assert!(!collection.contains_id(&0),
-                concat!("`", stringify!($type), "::contains_id` found an identifier when it shouldn't.")
+            assert!(!collection.contains_ident(&0),
+                concat!("`", stringify!($type), "::contains_ident` found an identifier when it shouldn't.")
             );
-            assert_eq!(*b, **collection.get_with_id(&1)
-                .expect(concat!("`", stringify!($type), "::get_with_id` failed to find a value.")),
-                concat!("`", stringify!($type), "::get_with_id` returned incorrect value.")
+            assert_eq!(WithIdent::as_ref(&b), collection.get_with_ident(1)
+                .expect(concat!("`", stringify!($type), "::get_with_ident` failed to find a value.")),
+                concat!("`", stringify!($type), "::get_with_ident` returned incorrect value.")
             );
-            assert_eq!(*b, **collection.get_with_id(&1)
-                .expect(concat!("`", stringify!($type), "::get_mut_with_id` failed to find a value.")),
-                concat!("`", stringify!($type), "::get_mut_with_id` returned incorrect value.")
+            assert_eq!(WithIdent::as_mut(&mut b), collection.get_mut_with_ident(1)
+                .expect(concat!("`", stringify!($type), "::get_mut_with_ident` failed to find a value.")),
+                concat!("`", stringify!($type), "::get_mut_with_ident` returned incorrect value.")
             );
         }}
     }
@@ -157,5 +200,13 @@ mod tests {
     #[test]
     fn test_linkedlist() {
         test_collection!(LinkedList, LinkedList::new())
+    }
+    #[test]
+    fn test_hashmap() {
+        test_collection!(HashMap, HashMap::with_capacity(1))
+    }
+    #[test]
+    fn test_btreemap() {
+        test_collection!(BTreeMap, BTreeMap::new())
     }
 }
