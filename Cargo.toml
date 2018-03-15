@@ -1,8 +1,9 @@
 [package]
 name = "ident"
-version = "0.2.5"
+version = "0.2.6"
 authors = ["Dynisious <daniel.bechaz@gmail.com>"]
 description = "A utility crate for wrapping types with an immutable identifier and storing/accessing such types in collections."
+readme = "README.md"
 repository = "https://github.com/Dynisious/ident"
 keywords = ["utility", "identifier", "key"]
 license = "0BSD"
