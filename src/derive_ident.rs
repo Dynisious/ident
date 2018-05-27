@@ -39,6 +39,10 @@ impl<T: DeriveIdent<I>, I: Eq> From<T> for WithIdent<T, I> {
     }
 }
 
+impl<T: DeriveIdent<I> + Default, I: Eq> Default for WithIdent<T, I> {
+    fn default() -> Self { T::default().into() }
+}
+
 /// In some cases, such as `integer` types, a value is its own unique `identifier`.
 ///
 /// This macro implements [`DeriveIdent`](./trait.DeriveIdent.html) for the passed type to

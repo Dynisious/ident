@@ -1,6 +1,6 @@
 [package]
 name = "ident"
-version = "0.2.8"
+version = "0.2.9"
 authors = ["Dynisious <daniel.bechaz@gmail.com>"]
 description = "A utility crate for wrapping types with an immutable identifier and storing/accessing such types in collections."
 readme = "README.md"
