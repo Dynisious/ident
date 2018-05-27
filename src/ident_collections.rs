@@ -54,6 +54,34 @@ pub trait IdentCollection<T, I: Eq = usize> {
     fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>>;
 }
 
+impl<T> IdentCollection<T, usize> for Vec<T> {
+    fn insert_by_ident(&mut self, mut value: WithIdent<T, usize>) -> Option<WithIdent<T, usize>> {
+        use std::mem::swap;
+
+        //Check if the index exists.
+        //The index exists.
+        if *value.get_identifier() < self.len() {
+            //Swap the values.
+            swap(&mut self[*value.get_identifier()], &mut value);
+            //Return the old value.
+            Some(value)
+        //The index doesn't exist.
+        } else {
+            let (index, value) = value.into();
+
+            //Will panic if `index` is not the end of the `Vec`.
+            self.insert(index, value); None
+        }
+    }
+    fn contains_ident(&self, identifier: &usize) -> bool { *identifier < self.len() }
+    fn get_with_ident(&self, identifier: usize) -> Option<WithIdent<&T, usize>> {
+        self.get(identifier).map(|value| WithIdent::new(identifier, value))
+    }
+    fn get_mut_with_ident(&mut self, identifier: usize) -> Option<WithIdent<&mut T, usize>> {
+        self.get_mut(identifier).map(|value| WithIdent::new(identifier, value))
+    }
+}
+
 impl<T, I: Eq> IdentCollection<T, I> for Vec<WithIdent<T, I>> {
     fn insert_by_ident(&mut self, mut value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
         if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(&value, e)) {
@@ -158,12 +186,12 @@ impl<T, I> IdentCollection<T, I> for BTreeMap<I, T> where I: Eq + Ord + Clone {
 #[cfg(test)]
 mod tests {
     macro_rules! test_collection {
-        ($type:tt, $($init:tt)*) => {{
+        ($type:tt, $init:expr) => {{
             use ident_collections::*;
             
-            let mut collection = $($init)*;
-            let a = WithIdent::<usize>::new(1, 5);
-            let mut b = WithIdent::<usize>::new(1, 10);
+            let mut collection = $init;
+            let a = WithIdent::<usize>::new(0usize, 5usize);
+            let mut b = WithIdent::<usize>::new(0usize, 10usize);
             
             assert!(collection.insert_by_ident(a).is_none(),
                 concat!("`", stringify!($type), "::insert_by_ident` returned a value while inserting.")
@@ -172,17 +200,17 @@ mod tests {
                 .expect(concat!("`", stringify!($type), "::insert_by_ident` failed while updating a value.")),
                 concat!("`", stringify!($type), "::insert_by_ident` returned an incorrect value from update.")
             );
-            assert!(collection.contains_ident(&1),
+            assert!(collection.contains_ident(&0usize),
                 concat!("`", stringify!($type), "::contains_ident` failed to find identifier.")
             );
-            assert!(!collection.contains_ident(&0),
+            assert!(!collection.contains_ident(&1usize),
                 concat!("`", stringify!($type), "::contains_ident` found an identifier when it shouldn't.")
             );
-            assert_eq!(WithIdent::as_ref(&b), collection.get_with_ident(1)
+            assert_eq!(WithIdent::as_ref(&b), collection.get_with_ident(0usize)
                 .expect(concat!("`", stringify!($type), "::get_with_ident` failed to find a value.")),
                 concat!("`", stringify!($type), "::get_with_ident` returned incorrect value.")
             );
-            assert_eq!(WithIdent::as_mut(&mut b), collection.get_mut_with_ident(1)
+            assert_eq!(WithIdent::as_mut(&mut b), collection.get_mut_with_ident(0usize)
                 .expect(concat!("`", stringify!($type), "::get_mut_with_ident` failed to find a value.")),
                 concat!("`", stringify!($type), "::get_mut_with_ident` returned incorrect value.")
             );
@@ -191,19 +219,23 @@ mod tests {
     
     #[test]
     fn test_vec() {
-        test_collection!(Vec, Vec::with_capacity(1))
+        test_collection!(Vec, Vec::<usize>::with_capacity(1))
     }
+    // #[test]
+    // fn test_vec_ident() {
+    //     test_collection!(Vec, Vec::<WithIdent<usize, usize>>::with_capacity(1))
+    // }
     #[test]
     fn test_vecdeque() {
-        test_collection!(VecDeque, VecDeque::with_capacity(1))
+        test_collection!(VecDeque, VecDeque::<WithIdent<usize, usize>>::with_capacity(1))
     }
     #[test]
     fn test_linkedlist() {
-        test_collection!(LinkedList, LinkedList::new())
+        test_collection!(LinkedList, LinkedList::<WithIdent<usize, usize>>::new())
     }
     #[test]
     fn test_hashmap() {
-        test_collection!(HashMap, HashMap::with_capacity(1))
+        test_collection!(HashMap, HashMap::<usize, usize>::with_capacity(1))
     }
     #[test]
     fn test_btreemap() {
