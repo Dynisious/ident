@@ -60,9 +60,9 @@ impl<T> IdentCollection<T, usize> for Vec<T> {
 
         //Check if the index exists.
         //The index exists.
-        if *value.get_identifier() < self.len() {
+        if *value.ident() < self.len() {
             //Swap the values.
-            swap(&mut self[*value.get_identifier()], &mut value);
+            swap(&mut self[*value.ident()], &mut value);
             //Return the old value.
             Some(value)
         //The index doesn't exist.
@@ -91,14 +91,14 @@ impl<T, I: Eq> IdentCollection<T, I> for Vec<WithIdent<T, I>> {
         self.push(value); None
     }
     fn contains_ident(&self, identifier: &I) -> bool {
-        self.iter().any(|e| e.get_identifier() == identifier)
+        self.iter().any(|e| e.ident() == identifier)
     }
     fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
-        self.iter().find(|e| e.get_identifier() == &identifier)
+        self.iter().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_ref()))
     }
     fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
-        self.iter_mut().find(|e| e.get_identifier() == &identifier)
+        self.iter_mut().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_mut()))
     }
 }
@@ -112,14 +112,14 @@ impl<T, I: Eq> IdentCollection<T, I> for VecDeque<WithIdent<T, I>> {
         self.push_back(value); None
     }
     fn contains_ident(&self, identifier: &I) -> bool {
-        self.iter().any(|e| e.get_identifier() == identifier)
+        self.iter().any(|e| e.ident() == identifier)
     }
     fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
-        self.iter().find(|e| e.get_identifier() == &identifier)
+        self.iter().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_ref()))
     }
     fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
-        self.iter_mut().find(|e| e.get_identifier() == &identifier)
+        self.iter_mut().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_mut()))
     }
 }
@@ -133,14 +133,14 @@ impl<T, I: Eq> IdentCollection<T, I> for LinkedList<WithIdent<T, I>> {
         self.push_back(value); None
     }
     fn contains_ident(&self, identifier: &I) -> bool {
-        self.iter().any(|e| e.get_identifier() == identifier)
+        self.iter().any(|e| e.ident() == identifier)
     }
     fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
-        self.iter().find(|e| e.get_identifier() == &identifier)
+        self.iter().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_ref()))
     }
     fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
-        self.iter_mut().find(|e| e.get_identifier() == &identifier)
+        self.iter_mut().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_mut()))
     }
 }

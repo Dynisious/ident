@@ -26,7 +26,7 @@ pub trait DeriveIdent<I: Eq> {
     /// assert_eq!(5, DeriveIdent::derive_ident(&5)); //Integer types return themselves by default.
     ///
     /// let wi = WithIdent::from(5);
-    /// assert_eq!(wi.get_identifier(), &5);
+    /// assert_eq!(wi.ident(), &5);
     /// assert_eq!(*wi, 5);
     /// # }
     /// ```

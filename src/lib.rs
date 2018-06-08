@@ -45,13 +45,13 @@ impl<T, I: Eq> WithIdent<T, I> {
     }
     /// Returns an immutable reference to the `identifier` of this `WithIdent`.
     #[inline]
-    pub const fn get_identifier(&self) -> &I {
+    pub const fn ident(&self) -> &I {
         &self.identifier
     }
     /// Compares the `identifiers` of two `WithIdent` instances for equality.
     #[inline]
     pub fn same_ident<U>(a: &WithIdent<T, I>, b: &WithIdent<U, I>) -> bool {
-        a.get_identifier() == b.get_identifier()
+        a.ident() == b.ident()
     }
     /// Consumes the `WithIdent` returning the wrapped `T` value.
     ///
@@ -109,7 +109,7 @@ impl<T, I: Eq> WithIdent<T, I> {
     /// # use ident::*;
     /// # fn main() {
     /// let wi = WithIdent::new(0, 5);
-    /// assert_eq!(1, *WithIdent::map_ident(wi, |x| x + 1).get_identifier());
+    /// assert_eq!(1, *WithIdent::map_ident(wi, |x| x + 1).ident());
     /// # }
     /// ```
     #[inline]
@@ -177,11 +177,11 @@ impl<T: DeriveIdent<I>, I: Eq> WithIdent<T, I> {
     /// # use ident::*;
     /// # fn main() {
     /// let mut wi = WithIdent::from(5);
-    /// assert_eq!(5, *wi.get_identifier());
+    /// assert_eq!(5, *wi.ident());
     ///
     /// *wi = 10;
     /// wi = WithIdent::update_ident(wi);
-    /// assert_eq!(10, *wi.get_identifier());
+    /// assert_eq!(10, *wi.ident());
     /// # }
     /// ```
     #[inline]
