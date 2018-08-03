@@ -25,14 +25,14 @@ pub use self::ident_collections::*;
 /// It can be useful to think of `WithIdent` as a tuple of `(I, T)`, so `From` and `Into`
 /// have been implemented for just that conversion.
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
-pub struct WithIdent<T, I: Eq = usize> {
+pub struct WithIdent<T, I = usize> {
     /// The unique `identifier` of a `WithIdent` instance.
     identifier: I,
     /// The inner `value` of a `WithIdent` instance.
     value: T,
 }
 
-impl<T, I: Eq> WithIdent<T, I> {
+impl<T, I,> WithIdent<T, I,> {
     /// Constructs a new `WithIdent` value from parts.
     ///
     /// # Params
@@ -47,11 +47,6 @@ impl<T, I: Eq> WithIdent<T, I> {
     #[inline]
     pub const fn ident(&self) -> &I {
         &self.identifier
-    }
-    /// Compares the `identifiers` of two `WithIdent` instances for equality.
-    #[inline]
-    pub fn same_ident<U>(a: &WithIdent<T, I>, b: &WithIdent<U, I>) -> bool {
-        a.ident() == b.ident()
     }
     /// Consumes the `WithIdent` returning the wrapped `T` value.
     ///
@@ -90,7 +85,7 @@ impl<T, I: Eq> WithIdent<T, I> {
     /// # }
     /// ```
     #[inline]
-    pub fn map<F, U>(wi: Self, f: F) -> WithIdent<U, I>
+    pub fn map<F, U>(wi: Self, f: F) -> WithIdent<U, I,>
         where F: FnOnce(T) -> U {
         WithIdent::new(wi.identifier, f(wi.value))
     }
@@ -114,12 +109,20 @@ impl<T, I: Eq> WithIdent<T, I> {
     /// ```
     #[inline]
     pub fn map_ident<F, U>(wi: Self, f: F) -> WithIdent<T, U>
-        where F: FnOnce(I) -> U, U: Eq {
+        where F: FnOnce(I) -> U, {
         WithIdent::new(f(wi.identifier), wi.value)
     }
 }
 
-impl<T, I: Eq + Clone> WithIdent<T, I> {
+impl<T, I: Eq,> WithIdent<T, I,> {
+    /// Compares the `identifiers` of two `WithIdent` instances for equality.
+    #[inline]
+    pub fn same_ident<U>(a: &WithIdent<T, I,>, b: &WithIdent<U, I,>) -> bool {
+        a.ident() == b.ident()
+    }
+}
+
+impl<T, I: Clone> WithIdent<T, I,> {
     /// Returns a new `WithIdent` instance wrapping a reference to the original value.
     ///
     /// Note: this is an associated function, which means that you have to call it as
@@ -137,7 +140,7 @@ impl<T, I: Eq + Clone> WithIdent<T, I> {
     /// # }
     /// ```
     #[inline]
-    pub fn as_ref(wi: &Self) -> WithIdent<&T, I> {
+    pub fn as_ref(wi: &Self) -> WithIdent<&T, I,> {
         WithIdent::new(wi.identifier.clone(), &wi.value)
     }
     /// Returns a new `WithIdent` instance wrapping a mutable reference to the original value.
@@ -157,86 +160,58 @@ impl<T, I: Eq + Clone> WithIdent<T, I> {
     /// # }
     /// ```
     #[inline]
-    pub fn as_mut(wi: &mut Self) -> WithIdent<&mut T, I> {
+    pub fn as_mut(wi: &mut Self) -> WithIdent<&mut T, I,> {
         WithIdent::new(wi.identifier.clone(), &mut wi.value)
     }
 }
 
-impl<T: DeriveIdent<I>, I: Eq> WithIdent<T, I> {
-    /// Consumes the `WithIdent` and returns a new instance with an updated `identifier`
-    /// derived from the inner value.
-    ///
-    /// Note: this is an associated function, which means that you have to call it as
-    /// `WithIdent::update_ident(wi)` instead of `wi.update_ident()`. This is so that
-    /// there is no conflict with a method on the inner type.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # extern crate ident;
-    /// # use ident::*;
-    /// # fn main() {
-    /// let mut wi = WithIdent::from(5);
-    /// assert_eq!(5, *wi.ident());
-    ///
-    /// *wi = 10;
-    /// wi = WithIdent::update_ident(wi);
-    /// assert_eq!(10, *wi.ident());
-    /// # }
-    /// ```
-    #[inline]
-    pub fn update_ident(mut wi: Self) -> Self {
-        wi.identifier = DeriveIdent::derive_ident(&wi.value); wi
-    }
-}
-
-impl<T: Eq, I: Eq> WithIdent<T, I> {
+impl<T: Eq, I,> WithIdent<T, I,> {
     /// Compares the `values` of two `WithIdent` instances for equality.
     #[inline]
-    pub fn same_value<U: Eq>(a: &WithIdent<T, I>, b: &WithIdent<T, U>) -> bool {
+    pub fn same_value<U>(a: &WithIdent<T, I,>, b: &WithIdent<T, U>) -> bool {
         a.value == b.value
     }
 }
 
-impl<T, I: Eq> From<(I, T)> for WithIdent<T, I> {
+impl<T, I,> From<(I, T)> for WithIdent<T, I,> {
     #[inline]
     fn from((id, value): (I, T)) -> Self { Self::new(id, value) }
 }
 
-impl<T, I: Eq> Into<(I, T)> for WithIdent<T, I> {
+impl<T, I,> Into<(I, T)> for WithIdent<T, I,> {
     #[inline]
     fn into(self) -> (I, T) { (self.identifier, self.value) }
 }
 
-impl<T, I: Eq> Deref for WithIdent<T, I> {
+impl<T, I,> Deref for WithIdent<T, I,> {
     type Target = T;
     
     #[inline]
     fn deref(&self) -> &Self::Target { &self.value }
 }
 
-impl<T, I: Eq> DerefMut for WithIdent<T, I> {
+impl<T, I,> DerefMut for WithIdent<T, I,> {
 
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.value }
 }
 
-impl<T, I: Eq> Borrow<T> for WithIdent<T, I> {
+impl<T, I,> Borrow<T> for WithIdent<T, I,> {
     #[inline]
     fn borrow(&self) -> &T { self.deref() }
 }
 
-impl<T, I: Eq> BorrowMut<T> for WithIdent<T, I> {
+impl<T, I,> BorrowMut<T> for WithIdent<T, I,> {
     #[inline]
     fn borrow_mut(&mut self) -> &mut T { self.deref_mut() }
 }
 
-impl<T, I: Eq> AsRef<T> for WithIdent<T, I> {
+impl<T, I,> AsRef<T> for WithIdent<T, I,> {
     #[inline]
     fn as_ref(&self) -> &T { self.borrow() }
 }
 
-impl<T, I: Eq> AsMut<T> for WithIdent<T, I> {
+impl<T, I,> AsMut<T> for WithIdent<T, I,> {
     #[inline]
     fn as_mut(&mut self) -> &mut T { self.borrow_mut() }
 }

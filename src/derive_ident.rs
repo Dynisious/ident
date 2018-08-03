@@ -8,8 +8,8 @@ use super::*;
 /// `DeriveIdent` is a "quality of life" trait when using [`WithIdent`](./struct.WithIdent.html).
 ///
 /// Any type `T` which implements this trait can easily be converted into a
-/// `WithIdent<T, I>` instance using `From` and `Into`.
-pub trait DeriveIdent<I: Eq> {
+/// `WithIdent<T, I,>` instance using `From` and `Into`.
+pub trait DeriveIdent<I,> {
     
     /// Returns an `Identifier` value derived from the passed `value`.
     ///
@@ -33,14 +33,42 @@ pub trait DeriveIdent<I: Eq> {
     fn derive_ident(value: &Self) -> I;
 }
 
-impl<T: DeriveIdent<I>, I: Eq> From<T> for WithIdent<T, I> {
+impl<T: DeriveIdent<I,>, I,> From<T> for WithIdent<T, I,> {
     fn from(from: T) -> Self {
         Self::new(DeriveIdent::derive_ident(&from), from)
     }
 }
 
-impl<T: DeriveIdent<I> + Default, I: Eq> Default for WithIdent<T, I> {
+impl<T: DeriveIdent<I,> + Default, I,> Default for WithIdent<T, I,> {
     fn default() -> Self { T::default().into() }
+}
+
+impl<T: DeriveIdent<I,>, I,> WithIdent<T, I,> {
+    /// Consumes the `WithIdent` and returns a new instance with an updated `identifier`
+    /// derived from the inner value.
+    ///
+    /// Note: this is an associated function, which means that you have to call it as
+    /// `WithIdent::update_ident(wi)` instead of `wi.update_ident()`. This is so that
+    /// there is no conflict with a method on the inner type.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # extern crate ident;
+    /// # use ident::*;
+    /// # fn main() {
+    /// let mut wi = WithIdent::from(5);
+    /// assert_eq!(5, *wi.ident());
+    ///
+    /// *wi = 10;
+    /// wi = WithIdent::update_ident(wi);
+    /// assert_eq!(10, *wi.ident());
+    /// # }
+    /// ```
+    #[inline]
+    pub fn update_ident(mut wi: Self) -> Self {
+        wi.identifier = DeriveIdent::derive_ident(&wi.value); wi
+    }
 }
 
 /// In some cases, such as `integer` types, a value is its own unique `identifier`.

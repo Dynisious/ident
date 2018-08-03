@@ -9,7 +9,7 @@ use super::*;
 
 /// The `IdentCollection` trait provides functionality for collections working with
 /// `WithIdent` values.
-pub trait IdentCollection<T, I: Eq = usize> {
+pub trait IdentCollection<T, I = usize> {
     /// Inserts the passed value or updates the first value found with an equal `identifier`.
     ///
     /// If a value is updated the old value is returned in a `Some(value)`.
@@ -29,7 +29,7 @@ pub trait IdentCollection<T, I: Eq = usize> {
     /// assert_eq!(b, vec[0]); //Updated value.
     /// # }
     /// ```
-    fn insert_by_ident(&mut self, value: WithIdent<T, I>) -> Option<WithIdent<T, I>>;
+    fn insert_by_ident(&mut self, value: WithIdent<T, I,>) -> Option<WithIdent<T, I,>>;
     /// Searches for the passed `identifier` in the collection.
     ///
     /// # Params
@@ -43,7 +43,7 @@ pub trait IdentCollection<T, I: Eq = usize> {
     /// # Params
     ///
     /// identifier --- The `identifier` to seach for.
-    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>>;
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I,>>;
     /// Attempts to retrieve a mutable reference to the value with the passed `identifier`.
     ///
     /// If a reference is found it is returned with the identifier attached.
@@ -51,7 +51,7 @@ pub trait IdentCollection<T, I: Eq = usize> {
     /// # Params
     ///
     /// identifier --- The `identifier` to seach for.
-    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>>;
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I,>>;
 }
 
 impl<T> IdentCollection<T, usize> for Vec<T> {
@@ -82,8 +82,8 @@ impl<T> IdentCollection<T, usize> for Vec<T> {
     }
 }
 
-impl<T, I: Eq> IdentCollection<T, I> for Vec<WithIdent<T, I>> {
-    fn insert_by_ident(&mut self, mut value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+impl<T, I: Eq,> IdentCollection<T, I,> for Vec<WithIdent<T, I,>> {
+    fn insert_by_ident(&mut self, mut value: WithIdent<T, I,>) -> Option<WithIdent<T, I,>> {
         if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(&value, e)) {
             swap::<T>(e, &mut value);
             return Some(value);
@@ -93,18 +93,18 @@ impl<T, I: Eq> IdentCollection<T, I> for Vec<WithIdent<T, I>> {
     fn contains_ident(&self, identifier: &I) -> bool {
         self.iter().any(|e| e.ident() == identifier)
     }
-    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I,>> {
         self.iter().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_ref()))
     }
-    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I,>> {
         self.iter_mut().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_mut()))
     }
 }
 
-impl<T, I: Eq> IdentCollection<T, I> for VecDeque<WithIdent<T, I>> {
-    fn insert_by_ident(&mut self, mut value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+impl<T, I: Eq,> IdentCollection<T, I,> for VecDeque<WithIdent<T, I,>> {
+    fn insert_by_ident(&mut self, mut value: WithIdent<T, I,>) -> Option<WithIdent<T, I,>> {
         if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(&value, e)) {
             swap::<T>(e, &mut value);
             return Some(value);
@@ -114,18 +114,18 @@ impl<T, I: Eq> IdentCollection<T, I> for VecDeque<WithIdent<T, I>> {
     fn contains_ident(&self, identifier: &I) -> bool {
         self.iter().any(|e| e.ident() == identifier)
     }
-    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I,>> {
         self.iter().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_ref()))
     }
-    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I,>> {
         self.iter_mut().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_mut()))
     }
 }
 
-impl<T, I: Eq> IdentCollection<T, I> for LinkedList<WithIdent<T, I>> {
-    fn insert_by_ident(&mut self, mut value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+impl<T, I: Eq,> IdentCollection<T, I,> for LinkedList<WithIdent<T, I,>> {
+    fn insert_by_ident(&mut self, mut value: WithIdent<T, I,>) -> Option<WithIdent<T, I,>> {
         if let Some(e) = self.iter_mut().find(|e| WithIdent::same_ident(&value, e)) {
             swap::<T>(e, &mut value);
             return Some(value);
@@ -135,18 +135,18 @@ impl<T, I: Eq> IdentCollection<T, I> for LinkedList<WithIdent<T, I>> {
     fn contains_ident(&self, identifier: &I) -> bool {
         self.iter().any(|e| e.ident() == identifier)
     }
-    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I,>> {
         self.iter().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_ref()))
     }
-    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I,>> {
         self.iter_mut().find(|e| e.ident() == &identifier)
         .map(|e| WithIdent::new(identifier, e.as_mut()))
     }
 }
 
-impl<T, I, S> IdentCollection<T, I> for HashMap<I, T, S> where I: Eq + ::std::hash::Hash + Clone, S: std::hash::BuildHasher {
-    fn insert_by_ident(&mut self, value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+impl<T, I: Eq, S> IdentCollection<T, I,> for HashMap<I, T, S> where I: ::std::hash::Hash + Clone, S: std::hash::BuildHasher {
+    fn insert_by_ident(&mut self, value: WithIdent<T, I,>) -> Option<WithIdent<T, I,>> {
         let (ident, value) = value.into();
         self.insert(ident.clone(), value)
         .map(|e| WithIdent::new(ident, e))
@@ -154,18 +154,18 @@ impl<T, I, S> IdentCollection<T, I> for HashMap<I, T, S> where I: Eq + ::std::ha
     fn contains_ident(&self, identifier: &I) -> bool {
         self.contains_key(identifier)
     }
-    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I,>> {
         self.get(&identifier)
         .map(|e| WithIdent::new(identifier, e))
     }
-    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I,>> {
         self.get_mut(&identifier)
         .map(|e| WithIdent::new(identifier, e))
     }
 }
 
-impl<T, I> IdentCollection<T, I> for BTreeMap<I, T> where I: Eq + Ord + Clone {
-    fn insert_by_ident(&mut self, value: WithIdent<T, I>) -> Option<WithIdent<T, I>> {
+impl<T, I,> IdentCollection<T, I,> for BTreeMap<I, T> where I: Ord + Clone {
+    fn insert_by_ident(&mut self, value: WithIdent<T, I,>) -> Option<WithIdent<T, I,>> {
         let (ident, value) = value.into();
         self.insert(ident.clone(), value)
         .map(|e| WithIdent::new(ident, e))
@@ -173,11 +173,11 @@ impl<T, I> IdentCollection<T, I> for BTreeMap<I, T> where I: Eq + Ord + Clone {
     fn contains_ident(&self, identifier: &I) -> bool {
         self.contains_key(identifier)
     }
-    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I>> {
+    fn get_with_ident(&self, identifier: I) -> Option<WithIdent<&T, I,>> {
         self.get(&identifier)
         .map(|e| WithIdent::new(identifier, e))
     }
-    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I>> {
+    fn get_mut_with_ident(&mut self, identifier: I) -> Option<WithIdent<&mut T, I,>> {
         self.get_mut(&identifier)
         .map(|e| WithIdent::new(identifier, e))
     }
@@ -221,10 +221,6 @@ mod tests {
     fn test_vec() {
         test_collection!(Vec, Vec::<usize>::with_capacity(1))
     }
-    // #[test]
-    // fn test_vec_ident() {
-    //     test_collection!(Vec, Vec::<WithIdent<usize, usize>>::with_capacity(1))
-    // }
     #[test]
     fn test_vecdeque() {
         test_collection!(VecDeque, VecDeque::<WithIdent<usize, usize>>::with_capacity(1))
